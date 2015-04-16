@@ -83,13 +83,13 @@ exports.videoPOST = function(req, res, next) {
                                             if (availableTimeslots.length == 0) {
                                                 setTimeSlots(d+1);
                                             }
-                                        }});
-                                    } else {
-                                        sendERR(err, res);
-                                    }
-                                })    
-                            }
-                            
+                                        }
+                                    });
+                                }
+                                } else {
+                                    sendERR(err, res);
+                                }  
+                            });
                         newVideo.save();
                     } else {
                         sendERR(err, res);
