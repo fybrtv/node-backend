@@ -39,7 +39,8 @@ var timeline = new Schema({//2 hour timelines
 	dateStart: {type: Date},
 	channelId: {type: String},
 	range: {type: Number},
-	timeslots: [timeslot]
+	timeslots: [timeslot],
+	day: {type: Number}
 })
 module.exports = db.model('videoFile', videoFile, 'videoFile'); 
 module.exports = db.model('series', series, 'series'); 
