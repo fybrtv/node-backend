@@ -57,7 +57,7 @@ exports.videoPOST = function(req, res, next) {
                                         });
 
                                         newTimeline.save();//save the new timeslot
-                                        availableTimeslots.pust(ts._id);
+                                        availableTimeslots.push(ts._id);
                                     } else {//if there are timelines available
                                         for (var i = 0; i < doctimelines.length; i++) { //loop through each timeline for this range
 
