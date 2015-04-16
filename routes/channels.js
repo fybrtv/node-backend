@@ -72,7 +72,7 @@ exports.channelsGET = function(req, res){
 	var data = req.params.id;
 	console.channels('channels get');
 	try {
-		channels.find({userId: data}, function(err, doc) {
+		channels.find({_id: data}, function(err, doc) {
 			if (err) console.channels(err);
 			if(doc) res.send("{ \"message\": \"channels found\", \"document\": "+JSON.stringify(doc)+" }");
 		});
@@ -89,7 +89,7 @@ exports.channelsIdDELETE = function(req, res) {
 					res.send("{ \"message\": \"channels deleted\" }");
 		    }
 		    else {   
-					res.send("{ \"message\": \"Issue\" }");
+					res.send("{ \"message\": \""+err+"\" }");
 		    }
 		});
 	} catch (err) {
