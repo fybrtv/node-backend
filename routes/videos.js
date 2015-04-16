@@ -44,7 +44,12 @@ exports.videoPOST = function(req, res, next) {
                                             filename: data.fileName
                                         });
                                         var newTimeline = new timeline({//create a new timeline and insert the new timeslot
-                                            dateStart: Date.now,
+                                            var date = new Date();
+                                            date.setHours(range*2);
+                                            date.setMinutes(0);
+                                            date.setSeconds(0);
+                                            date.setMilliseconds(0);
+                                            dateStart: date,//TODO need to set this to what makes sense
                                             timeslots: [ts],
                                             channelId: docchannel._id,
                                             range: range
