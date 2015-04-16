@@ -25,7 +25,7 @@ exports.videoPOST = function(req, res, next) {
                     _id: doc.channelId
                 }, function(err, docchannel) {
                     if (!err) {
-                        function setTimeSlots(d) {
+                        (function setTimeSlots(d) {
                             var availableTimeslots = []; //array that will hold ids of available timeslots
                             var range = ceil((doc.score / 100)); //normalize score into rounded up integer from 1-12
                             timelines.find({ //ensure that timelines only appear if they have the specified popularity range and are on the right channel
@@ -88,7 +88,7 @@ exports.videoPOST = function(req, res, next) {
                                     }
                                 }
                             });
-                        }
+                        })();
                     } else {
                         sendERR(err, res);
                     }
