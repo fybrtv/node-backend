@@ -13,11 +13,18 @@ exports.seriesPOST = function(req, res, next) {
 			score: data.score
 
 		});  
-		newSeries.save();
-		res.send("{ \"message\": \"series created\", \"id\": \""+ newSeries._id +"\" }");
+		newSeries.save(function(err){
+			console.log('save function');
+			if(err){
+				console.log(err);
+			}
+			else{
+				res.send("{ \"message\": \"channels created\", \"id\": \""+ newSeries._id +"\" }");
+			}
+		});
 
   	} catch (err) {
-  		console.series('error in post series');
+  		console.log('error in post series');
   		sendERR(err, res);
   	}
 }
@@ -28,7 +35,7 @@ exports.seriesIdPost = function(req, res, next) {
 
     try {
 		series.findOne({_id: seriesId}, function(err, doc) {
-			if (err) console.series(err);
+			if (err) console.log(err);
 		  	if (doc) {
 
 		  		for (var key in data) {
@@ -60,7 +67,7 @@ exports.seriesIdGET = function(req, res) {
 	var seriesId = req.params.id;
 	try {
 		series.findOne({_id: seriesId}, function(err, doc) {
-			if (err) console.series(err);
+			if (err) console.log(err);
 			if (doc) {
 				res.send("{ \"message\": \"series found\", \"document\": "+JSON.stringify(doc)+" }");
 			} else {
@@ -73,10 +80,10 @@ exports.seriesIdGET = function(req, res) {
 }
 exports.seriesGET = function(req, res){
 	var data = req.params.id;
-	console.series('series get');
+	console.log('series get');
 	try {
-		series.find({userId: data}, function(err, doc) {
-			if (err) console.series(err);
+		series.findOne({_id: data}, function(err, doc) {
+			if (err) console.log(err);
 			if(doc) res.send("{ \"message\": \"series found\", \"document\": "+JSON.stringify(doc)+" }");
 		});
 	} catch (err) {
@@ -85,7 +92,7 @@ exports.seriesGET = function(req, res){
 }
 exports.seriesIdDELETE = function(req, res) {
 	var seriesId = req.params.id;
-	console.series(seriesId);
+	console.log(seriesId);
 	try {
 		series.remove({ _id: req.params.id }, function(err) {
 		    if (!err) {

@@ -26,11 +26,12 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
-app.get('/timelines/:id', routes.timelinesGET)
+app.get('/timelines/:id', videos.timelinesGET)
 app.post('/videos',videos.videoPOST)
-add.post('/series',series.seriesPOST)
-add.post('/channels',series.channelsPOST)
-
+app.post('/series',series.seriesPOST)
+app.get('/series/:id',series.seriesGET)
+app.post('/channels',channels.channelsPOST)
+app.get('/channels/:id',channels.channelsGET);
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
   var err = new Error('Not Found');

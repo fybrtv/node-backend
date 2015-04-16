@@ -1,5 +1,5 @@
 var mongoose = require("mongoose");
-var channels = mongoose.model('channels');
+var channels = mongoose.model('channel');
 function sendERR(err, res) {
 	res.send("{ \"message\": \"" + err + "\" }");
 }
@@ -8,13 +8,20 @@ exports.channelsPOST = function(req, res, next) {
 	var data = req.body;
   	try {
   		var newchannels = new channels({
-			name: data.name,
+			channelName: data.channelName,
 		});  
-		newchannels.save();
-		res.send("{ \"message\": \"channels created\", \"id\": \""+ newchannels._id +"\" }");
+		newchannels.save(function(err){
+			console.log('save function');
+			if(err){
+				console.log('error');
+			}
+			else{
+				res.send("{ \"message\": \"channels created\", \"id\": \""+ newchannels._id +"\" }");
+			}
+		});
 
   	} catch (err) {
-  		console.channels('error in post channels');
+  		console.log('error in post channels');
   		sendERR(err, res);
   	}
 }
@@ -25,7 +32,7 @@ exports.channelsIdPost = function(req, res, next) {
 
     try {
 		channels.findOne({_id: channelsId}, function(err, doc) {
-			if (err) console.channels(err);
+			if (err) console.log(err);
 		  	if (doc) {
 
 		  		for (var key in data) {
@@ -57,7 +64,7 @@ exports.channelsIdGET = function(req, res) {
 	var channelsId = req.params.id;
 	try {
 		channels.findOne({_id: channelsId}, function(err, doc) {
-			if (err) console.channels(err);
+			if (err) console.log(err);
 			if (doc) {
 				res.send("{ \"message\": \"channels found\", \"document\": "+JSON.stringify(doc)+" }");
 			} else {
@@ -70,10 +77,10 @@ exports.channelsIdGET = function(req, res) {
 }
 exports.channelsGET = function(req, res){
 	var data = req.params.id;
-	console.channels('channels get');
+	console.log('channels get');
 	try {
 		channels.find({_id: data}, function(err, doc) {
-			if (err) console.channels(err);
+			if (err) console.log(err);
 			if(doc) res.send("{ \"message\": \"channels found\", \"document\": "+JSON.stringify(doc)+" }");
 		});
 	} catch (err) {
@@ -82,7 +89,7 @@ exports.channelsGET = function(req, res){
 }
 exports.channelsIdDELETE = function(req, res) {
 	var channelsId = req.params.id;
-	console.channels(channelsId);
+	console.log(channelsId);
 	try {
 		channels.remove({ _id: req.params.id }, function(err) {
 		    if (!err) {

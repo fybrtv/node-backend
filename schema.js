@@ -24,7 +24,7 @@ var series = new Schema({
 var channel = new Schema({
 	id: ObjectId,
 	dateCreated: {type: Date, default: Date.now},
-	name: {type: Number}
+	channelName: {type: String}
 })
 var timeslot = new Schema({
 	id: ObjectId,
