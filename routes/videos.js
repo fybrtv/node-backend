@@ -8,6 +8,27 @@ var timeslots = mongoose.model('timeslot');
 function sendERR(err, res) {
     res.send("{ \"message\": \"" + err + "\" }");
 }
+
+exports.timelinesGET = function(req, res, next) {
+    var id = req.params.id;
+    var range = req.query.range || "all";
+    var day = req.query.day || "all";
+
+    timelines.find({ //ensure that timelines only appear if they have the specified popularity range and are on the right channel
+        $and: [{
+            channelId: id
+        }, {
+            range: range
+        }, {
+            day: day
+        }]
+    }).sort({ //sort ascending from upcoming dates
+        dateStarted: "1"
+    }).exec(function(err, doctimelines) {
+        res.send(doctimelines)
+    });
+}
+
 exports.videoPOST = function(req, res, next) {
     var data = req.body;
     try {
@@ -64,8 +85,12 @@ exports.videoPOST = function(req, res, next) {
                                         range: range
                                     });
 
-                                    newTimeline.save(); //save the new timeslot
-                                    availableTimeslots.push(ts._id);
+                                    newTimeline.save(function(err, savedTimeline) {
+                                        availableTimeslots.push(ts._id);
+                                        res.send("{ \"Timeline\": "+savedTimeline);
+
+                                    }); //save the new timeslot
+                                    
                                 } else { //if there are timelines available
                                     for (var i = 0; i < doctimelines.length; i++) { //loop through each timeline for this range
 
@@ -79,7 +104,10 @@ exports.videoPOST = function(req, res, next) {
                                             //update timeline object with new timeslot
                                             var updatedTimeslot = doctimelines[i].timeslots.push(newTimeslot);
                                             doctimelines[i].timeslots = updatedTimeslot;
-                                            doctimelines.save();
+                                            doctimelines.save(function(err, savedTimeline) {
+                                                res.send("{ \"Timeline\": "+savedTimeline);
+                                            
+                                            });
                                             availableTimeslots.push(newTimeslot._id); //push available timeslot to arr
                                         }
                                     }
