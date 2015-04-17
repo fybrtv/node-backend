@@ -10,7 +10,7 @@ conn.on('error', console.error.bind(console, 'connection error:'));
 var videoFile = new Schema({
 	id: ObjectId,
 	dateCreated: {type: Date, default: Date.now},
-	seriesId: {type: String, index: { unique: true }, required: true},
+	seriesId: {type: String},
 	length: {type: Number},
 	fileName: {type: String}
 });
@@ -31,7 +31,7 @@ var timeslot = new Schema({
 	dateCreated: {type: Date, default: Date.now},
 	start: {type : Number},
 	end: {type: Number},
-	fileId: {type: String, required: true}
+	fileId: {type: String}
 })
 var timeline = new Schema({//2 hour timelines
 	id: ObjectId,
