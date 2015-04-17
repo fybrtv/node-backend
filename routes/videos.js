@@ -72,19 +72,10 @@ exports.videoPOST = function(req, res, next) {
                                                 fileId: newVideo._id
                                             });
                                             var date = new Date();
-                                            console.log(date.getDate());
                                             date.setDate(date.getDate() + d);
-                                            console.log(date);
-
                                             date.setHours(range * 2);
-                                            console.log(date);
-
                                             date.setMinutes(0);
-                                            console.log(date);
-
                                             date.setSeconds(0);
-                                            console.log(date);
-
                                             var dayInt = d;
                                             if (dayInt > 6) {
                                                 dayInt = dayInt % 7;
@@ -96,17 +87,14 @@ exports.videoPOST = function(req, res, next) {
                                                 channelId: docchannel._id,
                                                 range: range
                                             });
-
                                             newTimeline.save(function(err) {
                                                 if (err) {
                                                     console.log(err);
                                                 }
                                                 availableTimeslots.push(ts._id);
-                                                console.log('available timeslots: ' + availableTimeslots);
                                                 res.send("{ \"Timeline id\": " + newTimeline._id);
 
                                             }); //save the new timeslot
-
                                         } else { //if there are timelines available
                                             for (var i = 0; i < doctimelines.length; i++) { //loop through each timeline for this range
 
@@ -121,9 +109,6 @@ exports.videoPOST = function(req, res, next) {
                                                     //update timeline object with new timeslot
                                                     var updatedTimeslot = doctimelines[i].timeslots.push(newTimeslot);
                                                     doctimelines[i].timeslots = updatedTimeslot;
-                                                    console.log('doctimelines[i].timeslots \n' + doctimelines[i].timeslots + '\n');
-                                                    console.log('doctimelines\n' + doctimelines + '\n');
-                                                    console.log('doctimeslines\n' + doctimelines[i] + '\n');
                                                     timelines.findByIdAndUpdate(
                                                         doctimelines[i]._id, {
                                                             $push: {
