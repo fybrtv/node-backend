@@ -31,7 +31,7 @@ exports.timelinesGET = function(req, res, next) {
 
 exports.videoPOST = function(req, res, next) {
     var data = req.body;
-    var rangeLookupTableWKD = {};
+    var rangeLookupTableWKD = new Array();
     rangeLookupTableWKD[1] = 2;
     rangeLookupTableWKD[2] = 3;
     rangeLookupTableWKD[3] = 1;
@@ -44,7 +44,7 @@ exports.videoPOST = function(req, res, next) {
     rangeLookupTableWKD[10] = 5;
     rangeLookupTableWKD[11] = 11;
     rangeLookupTableWKD[12] = 10;
-    var rangeLookupTableWK = {};
+    var rangeLookupTableWK = new Array();
     rangeLookupTableWK[1] = 3;
     rangeLookupTableWK[2] = 2;
     rangeLookupTableWK[3] = 1;
@@ -99,7 +99,12 @@ exports.videoPOST = function(req, res, next) {
                                             });
                                             var date = new Date();
                                             date.setDate(date.getDate() + d);
-                                            date.setHours(range * 2);
+                                            if((date.getDay() == 0) || (date.getDay() == 6)){
+                                                date.setHours((rangeLookupTableWKD[range]) * 2);
+                                            }
+                                            else{
+                                                date.setHours((rangeLookupTableWK[range]) * 2);
+                                            }
                                             date.setMinutes(0);
                                             date.setSeconds(0);
                                             var dayInt = d;
