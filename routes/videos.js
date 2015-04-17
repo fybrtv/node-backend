@@ -31,6 +31,32 @@ exports.timelinesGET = function(req, res, next) {
 
 exports.videoPOST = function(req, res, next) {
     var data = req.body;
+    var rangeLookupTableWKD = {};
+    rangeLookupTableWKD[1] = 2;
+    rangeLookupTableWKD[2] = 3;
+    rangeLookupTableWKD[3] = 1;
+    rangeLookupTableWKD[4] = 8;
+    rangeLookupTableWKD[5] = 7;
+    rangeLookupTableWKD[6] = 9;
+    rangeLookupTableWKD[7] = 4;
+    rangeLookupTableWKD[8] = 0;
+    rangeLookupTableWKD[9] = 6;
+    rangeLookupTableWKD[10] = 5;
+    rangeLookupTableWKD[11] = 11;
+    rangeLookupTableWKD[12] = 10;
+    var rangeLookupTableWK = {};
+    rangeLookupTableWK[1] = 3;
+    rangeLookupTableWK[2] = 2;
+    rangeLookupTableWK[3] = 1;
+    rangeLookupTableWK[4] = 4;
+    rangeLookupTableWK[5] = 7;
+    rangeLookupTableWK[6] = 5;
+    rangeLookupTableWK[7] = 6;
+    rangeLookupTableWK[8] = 8;
+    rangeLookupTableWK[9] = 0;
+    rangeLookupTableWK[10] = 9;
+    rangeLookupTableWK[11] = 11;
+    rangeLookupTableWK[12] = 10;
     try {
         series.findOne({ //find series
             _id: data.seriesId
