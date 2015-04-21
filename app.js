@@ -12,6 +12,7 @@ var routes = require('./routes/index');
 var videos = require('./routes/videos');
 var series = require('./routes/series');
 var channels = require('./routes/channels');
+var users = require('./routes/users');
 var app = express();
 
 // view engine setup
@@ -32,6 +33,12 @@ app.post('/series',series.seriesPOST)
 app.get('/series/:id',series.seriesGET)
 app.post('/channels',channels.channelsPOST)
 app.get('/channels/:id',channels.channelsGET);
+app.post('/users',users.usersPOST);
+app.get('/users/:id',users.usersIdGET);
+app.delete('/users/:id',users.usersIdDELETE);
+app.post('/users/auth',users.usersAUTH);
+app.post('/users/post/:id',users.usersIdPOST);
+app.post('/users/logout',users.usersLogout);
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
   var err = new Error('Not Found');

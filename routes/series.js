@@ -11,7 +11,6 @@ exports.seriesPOST = function(req, res, next) {
 			creatorId: data.creatorId,
 			channelId: data.channelId,
 			score: data.score
-
 		});  
 		newSeries.save(function(err){
 			console.log('save function');

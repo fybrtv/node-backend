@@ -42,8 +42,21 @@ var timeline = new Schema({//2 hour timelines
 	timeslots: [timeslot],
 	day: {type: Number}
 })
+var userSchema = new Schema({
+	id: ObjectId,
+	dateCreated: {type: Date, default: Date.now},
+	firstName: {type: String},
+	lastName: {type: String},
+	email: {type: String, index: { unique: true }, required: true},
+	username: {type: String, index: { unique: true }, required: true},
+	password: {type: String, required: true},
+	gravatar: {type: String},
+	avatar: {type: String},
+	typeOfAccount: {type: Number} //type of account will be an int, 1 for creator, 0 for streamer, 2 for both
+})
 module.exports = db.model('videoFile', videoFile, 'videoFile'); 
 module.exports = db.model('series', series, 'series'); 
 module.exports = db.model('channel', channel, 'channel'); 
 module.exports = db.model('timeslot', timeslot, 'timeslot'); 
 module.exports = db.model('timeline', timeline, 'timeline');
+module.exports = db.model('users', userSchema,'users');

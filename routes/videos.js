@@ -66,7 +66,7 @@ exports.videoPOST = function(req, res, next) {
                 var newVideo = new videoFile({ //create new video file object
                     seriesId: data.seriesId,
                     fileName: data.fileName,
-                    length: data.lengthOfFile
+                    length: data.lengthOfFile   
                 });
                 var range = Math.ceil((score / 100)); //normalize score into rounded up integer from 1-12
                 newVideo.save(function(err) {
