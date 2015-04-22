@@ -96,7 +96,7 @@ exports.usersPOST = function(req, res, next) {
 														console.log(newUser);
 
 														res.send("{ \"message\": \"User "+ data.username +" Created\", \"id\": \"" + newUser._id + "\" }");
-														next();
+														//next();
 												} else if (response == false) {
 													sendERR("Passwords do not match.", res)
 												} else {
