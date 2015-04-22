@@ -6,7 +6,7 @@ var validator = require('validator');
 var gravatar = require('gravatar');
 
 function sendERR(err, res) {
-	res.send("{ \"message\": \""+ err +"\" }");
+	res.send("{ \"message\": \""+ err +"\", \"success\": \"false\"}");
 }
 
 exports.usersAUTH = function(req, res) {
@@ -20,10 +20,9 @@ exports.usersAUTH = function(req, res) {
 					console.log(foundUser)
 					var token = crypto.randomBytes(32).toString("hex");
 
-					sess = req.session
-					sess.token = token;
-
-					res.send("{ \"message\": \"User authenticated\", \"token\": \""+token+"\", \"userID\": \""+foundUser._id+"\", \"firstName\": \""+foundUser.firstName+"\", \"lastName\": \""+foundUser.lastName+"\", \"email\": \""+foundUser.email+"\", \"username\": \""+foundUser.username+"\"}");
+					//req.session.token = token;
+					//console.log("Saved: "+req.session.token)
+					res.send("{ \"message\": \"User authenticated\", \"token\": \""+token+"\", \"userID\": \""+foundUser._id+"\", \"firstName\": \""+foundUser.firstName+"\", \"lastName\": \""+foundUser.lastName+"\", \"email\": \""+foundUser.email+"\", \"username\": \""+foundUser.username+"\", \"success\": \"true\"}");
 
 				} else if (response === false){
 					sendERR("User not authenticated; invalid password", res);
@@ -42,7 +41,6 @@ exports.usersAUTH = function(req, res) {
 exports.usersPOST = function(req, res, next) {
 	var data = req.body;
 	console.log(data);	
-	console.log("IMAGE: "+data.avatar)
 	//validation
 	/*	
 	sample req...http://0.0.0.0:3000/users
@@ -95,7 +93,7 @@ exports.usersPOST = function(req, res, next) {
 
 														console.log(newUser);
 
-														res.send("{ \"message\": \"User "+ data.username +" Created\", \"id\": \"" + newUser._id + "\" }");
+														res.send("{ \"message\": \"User "+ data.username +" Created\", \"id\": \"" + newUser._id + "\", \"success\": \"true\" }");
 														//next();
 												} else if (response == false) {
 													sendERR("Passwords do not match.", res)
@@ -194,9 +192,8 @@ exports.usersLogout = function(req, res) {
 	console.log(token);
 	console.log(req.session.token)
 	if (req.session.token == token) {
-		delete req.session.token;
 		console.log("User session <" + token + "> successfully deleted");
-		res.send("{ \"message\": \"User session <" + token + "> successfully deleted\" }");
+		res.send("{ \"message\": \"User session <" + token + "> successfully deleted\", \"success\": \"true\" }");
 	} else {
 		sendERR("Token is invalid", res);
 	}
