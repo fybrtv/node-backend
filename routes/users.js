@@ -23,7 +23,7 @@ exports.usersAUTH = function(req, res) {
 					sess = req.session
 					sess.token = token;
 
-					res.send("{ \"message\": \"User authenticated\", \"token\": \""+token+"\", \"userID\": \""+foundUser._id+"\"}");
+					res.send("{ \"message\": \"User authenticated\", \"token\": \""+token+"\", \"userID\": \""+foundUser._id+"\", \"firstName\": \""+foundUser.firstName+"\", \"lastName\": \""+foundUser.lastName+"\", \"email\": \""+foundUser.email+"\", \"username\": \""+foundUser.username+"\"}");
 
 				} else if (response === false){
 					sendERR("User not authenticated; invalid password", res);
@@ -192,6 +192,7 @@ exports.usersIdDELETE = function(req, res) {
 exports.usersLogout = function(req, res) {
 	var token = req.body.token;
 	console.log(token);
+	console.log(req.session.token)
 	if (req.session.token == token) {
 		delete req.session.token;
 		console.log("User session <" + token + "> successfully deleted");
