@@ -19,7 +19,8 @@ var series = new Schema({
 	dateCreated: {type: Date, default: Date.now},
 	creatorId: {type: String, required: true},
 	channelId: {type: String, required: true},
-	score: {type: Number}
+	score: {type: Number},
+	title: {type: String}
 });
 var channel = new Schema({
 	id: ObjectId,

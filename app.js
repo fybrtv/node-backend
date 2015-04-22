@@ -33,7 +33,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.get('/timelines/:id', videos.timelinesGET)
 app.post('/videos',videos.videoPOST)
 app.post('/series',series.seriesPOST)
-app.get('/series/:id',series.seriesGET)
+app.get('/series',series.seriesGET)
 app.post('/channels',channels.channelsPOST)
 app.get('/channels/:id',channels.channelsGET);
 app.post('/users',users.usersPOST);

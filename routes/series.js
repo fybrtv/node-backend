@@ -78,16 +78,37 @@ exports.seriesIdGET = function(req, res) {
 	}
 }
 exports.seriesGET = function(req, res){
-	var data = req.params.id;
-	console.log('series get');
-	try {
-		series.findOne({_id: data}, function(err, doc) {
-			if (err) console.log(err);
-			if(doc) res.send("{ \"message\": \"series found\", \"document\": "+JSON.stringify(doc)+" }");
-		});
-	} catch (err) {
-		sendERR(err, res);
+	if (req.query.name) 
+	{
+		var data = req.query.name;
+		console.log('series get');
+		try {
+			series.findOne({title: data}, function(err, doc) {
+				if (err) console.log(err);
+				if(doc) {
+					res.send("{ \"message\": \"series found\", \"document\": "+JSON.stringify(doc)+" }")
+				}	else {
+					sendERR("Series document not found", res);
+				}
+			});
+		} catch (err) {
+			sendERR(err, res);
+		}
+	} else {
+		try {
+			series.find({}, function(err, doc) {
+				if (err) console.log(err);
+				if(doc) {
+					res.send("{ \"message\": \"series found\", \"document\": "+JSON.stringify(doc)+" }")
+				}	else {
+					sendERR("Series documents not found", res);
+				}
+			});
+		} catch (err) {
+			sendERR(err, res);
+		}
 	}
+	
 }
 exports.seriesIdDELETE = function(req, res) {
 	var seriesId = req.params.id;
