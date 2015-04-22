@@ -4,7 +4,7 @@ var favicon = require('serve-favicon');
 var logger = require('morgan');
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
-
+var session = require('express-session');
 var mongoose = require("mongoose");
 var schema = require("./schema");
 
@@ -25,6 +25,9 @@ app.use(logger('dev'));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
+app.use(session({ resave: true,
+                  saveUninitialized: true,
+                  secret: 'fybriseverything' }));
 app.use(express.static(path.join(__dirname, 'public')));
 
 app.get('/timelines/:id', videos.timelinesGET)
