@@ -12,7 +12,8 @@ var videoFile = new Schema({
 	dateCreated: {type: Date, default: Date.now},
 	seriesId: {type: String},
 	length: {type: Number},
-	fileName: {type: String}
+	fileName: {type: String},
+	episodeName: {type: String},
 });
 var series = new Schema({
 	id: ObjectId,
@@ -53,7 +54,7 @@ var userSchema = new Schema({
 	password: {type: String, required: true},
 	gravatar: {type: String},
 	avatar: {type: String},
-	typeOfAccount: {type: Number} //type of account will be an int, 1 for creator, 0 for streamer, 2 for both
+	typeOfAccount: {type: Number, default: 0} //type of account will be an int, 1 for creator, 0 for streamer
 })
 module.exports = db.model('videoFile', videoFile, 'videoFile'); 
 module.exports = db.model('series', series, 'series'); 

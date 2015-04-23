@@ -40,7 +40,7 @@ app.post('/users',users.usersPOST);
 app.get('/users/:id',users.usersIdGET);
 app.delete('/users/:id',users.usersIdDELETE);
 app.post('/users/auth',users.usersAUTH);
-app.post('/users/post/:id',users.usersIdPOST);
+app.post('/users/:id',users.usersIdPOST);
 app.post('/users/logout',users.usersLogout);
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {

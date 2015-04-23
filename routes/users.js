@@ -147,7 +147,7 @@ exports.usersIdPOST = function(req, res, next) {
 	  			if (err) {
 	  				sendERR("Could not save the data", res)
 	  			} else {
-	  				res.send("{ \"message\": \"User documents updated successfully\" }");
+	  				res.send("{ \"message\": \"User documents updated successfully\", \"success\": \"true\" }");
 	  			}
 	  		});
 
