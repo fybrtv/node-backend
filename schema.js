@@ -13,7 +13,7 @@ var videoFile = new Schema({
 	seriesId: {type: String},
 	length: {type: Number},
 	fileName: {type: String},
-	episodeName: {type: String},
+	episodeName: {type: String}
 });
 var series = new Schema({
 	id: ObjectId,
