@@ -22,7 +22,7 @@ exports.usersAUTH = function(req, res) {
 
 					//req.session.token = token;
 					//console.log("Saved: "+req.session.token)
-					res.send("{ \"message\": \"User authenticated\", \"token\": \""+token+"\", \"userID\": \""+foundUser._id+"\", \"firstName\": \""+foundUser.firstName+"\", \"lastName\": \""+foundUser.lastName+"\", \"email\": \""+foundUser.email+"\", \"username\": \""+foundUser.username+"\", \"success\": \"true\"}");
+					res.send("{ \"message\": \"User authenticated\", \"token\": \""+token+"\", \"typeOfAccount\": \""+foundUser.typeOfAccount+"\", \"userID\": \""+foundUser._id+"\", \"firstName\": \""+foundUser.firstName+"\", \"lastName\": \""+foundUser.lastName+"\", \"email\": \""+foundUser.email+"\", \"username\": \""+foundUser.username+"\", \"success\": \"true\"}");
 
 				} else if (response === false){
 					sendERR("User not authenticated; invalid password", res);
@@ -135,7 +135,7 @@ exports.usersIdPOST = function(req, res, next) {
 	  	if (doc) {
 
 	  		for (var key in data) {
-	  			if (key != "_id" || key != "dateCreated" || key != "password" || key != "username" || key != "email") {
+	  			if (key != "_id" || key != "dateCreated" || key != "password" || key != "username") {
 	  				if (data[key] != null) {
 		  				doc[key] = data[key];
 		  			} 
@@ -147,6 +147,7 @@ exports.usersIdPOST = function(req, res, next) {
 	  			if (err) {
 	  				sendERR("Could not save the data", res)
 	  			} else {
+	  				console.log(JSON.stringify(doc));
 	  				res.send("{ \"message\": \"User documents updated successfully\", \"success\": \"true\" }");
 	  			}
 	  		});
