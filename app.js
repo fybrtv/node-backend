@@ -34,7 +34,9 @@ app.get('/timelines/:id', videos.timelinesGET)
 app.post('/videos',videos.videoPOST)
 app.post('/series',series.seriesPOST)
 app.get('/series',series.seriesGET)
-app.post('/channels',channels.channelsPOST)
+app.get('/series/userId/:id',series.seriesUserIdGET)
+app.post('/channels', channels.channelsPOST);
+app.get('/channels', channels.channelsGET);
 app.get('/channels/:id',channels.channelsGET);
 app.post('/users',users.usersPOST);
 app.get('/users/:id',users.usersIdGET);
@@ -42,7 +44,6 @@ app.delete('/users/:id',users.usersIdDELETE);
 app.post('/users/auth',users.usersAUTH);
 app.post('/users/:id',users.usersIdPOST);
 app.post('/users/logout',users.usersLogout);
-app.post('/series/userId/:id',series.seriesUserIdGET);
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
   var err = new Error('Not Found');
