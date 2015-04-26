@@ -18,7 +18,6 @@ var videoFile = new Schema({
 var series = new Schema({
 	id: ObjectId,
 	dateCreated: {type: Date, default: Date.now},
-	creatorId: {type: String, required: true},
 	channelId: {type: String, required: true},
 	userId: {type: String},
 	score: {type: Number},
