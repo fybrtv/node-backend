@@ -77,6 +77,21 @@ exports.seriesIdGET = function(req, res) {
 		sendERR(err, res)
 	}
 }
+exports.seriesUserIdGET = function(req, res) {
+	var userId = req.params.id;
+	try {
+		series.find({userId: userId}, function(err, doc) {
+			if (err) console.log(err);
+			if (doc) {
+				res.send("{ \"message\": \"series found\", \"document\": "+JSON.stringify(doc)+" }");
+			} else {
+				res.send("{ \"message\": \"series not found\" }");
+			};
+		});
+	} catch (err) {
+		sendERR(err, res)
+	}
+}
 exports.seriesGET = function(req, res){
 	if (req.query.name) 
 	{
