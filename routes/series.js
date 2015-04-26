@@ -10,7 +10,9 @@ exports.seriesPOST = function(req, res, next) {
   		var newSeries = new series({
 			creatorId: data.creatorId,
 			channelId: data.channelId,
-			score: data.score
+			score: data.score,
+			userId: data.userId,
+			title: data.title
 		});  
 		newSeries.save(function(err){
 			console.log('save function');
@@ -18,7 +20,7 @@ exports.seriesPOST = function(req, res, next) {
 				console.log(err);
 			}
 			else{
-				res.send("{ \"message\": \"channels created\", \"id\": \""+ newSeries._id +"\" }");
+				res.send("{ \"message\": \"series created\", \"id\": \""+ newSeries._id +"\" }");
 			}
 		});
 

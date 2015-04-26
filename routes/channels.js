@@ -76,10 +76,9 @@ exports.channelsIdGET = function(req, res) {
 	}
 }
 exports.channelsGET = function(req, res){
-	var data = req.params.id;
 	console.log('channels get');
 	try {
-		channels.find({_id: data}, function(err, doc) {
+		channels.find({}, function(err, doc) {
 			if (err) console.log(err);
 			if(doc) res.send("{ \"message\": \"channels found\", \"document\": "+JSON.stringify(doc)+" }");
 		});

@@ -20,6 +20,7 @@ var series = new Schema({
 	dateCreated: {type: Date, default: Date.now},
 	creatorId: {type: String, required: true},
 	channelId: {type: String, required: true},
+	userId: {type: String},
 	score: {type: Number},
 	title: {type: String}
 });
