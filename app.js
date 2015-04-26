@@ -42,6 +42,7 @@ app.delete('/users/:id',users.usersIdDELETE);
 app.post('/users/auth',users.usersAUTH);
 app.post('/users/:id',users.usersIdPOST);
 app.post('/users/logout',users.usersLogout);
+app.post('/series/userId/:id',series.seriesUserIdGET);
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
   var err = new Error('Not Found');
