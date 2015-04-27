@@ -59,131 +59,213 @@ exports.videoPOST = function(req, res, next) {
   rangeLookupTableWK[12] = 10;
   try {
     series.findOne({ //find series
-        _id: data.seriesId
-      }, function(err, doc) {
-        if (!err) {
-          console.log('seriesId: ', data.seriesId)
-          console.log('doc: ', doc)
-          var score = doc.score; //get score for series
-          var newVideo = new videoFile({ //create new video file object
-            seriesId: data.seriesId,
-            fileName: data.fileName,
-            length: data.lengthOfFile,
-            episodeName: data.episodeName
-          });
-          var range = Math.ceil((score / 100)); //normalize score into rounded up integer from 1-12
-          newVideo.save(function(err) {
-              channels.findOne({ //find channel that series is on
-                  _id: doc.channelId
-                }, function(err, docchannel) {
-                  if (!err) {
-                    (function setTimeSlots(d) {
-                        var availableTimeslots = []; //array that will hold ids of available timeslots
-                        if (range >= 1) {
-                          if ((d == 14)) { //check if two weeks in advance and range is still real
-                            d = 0;
-                            range = range - 1;
-                          }
-                          console.log('got to d less than 14 and range more than 1');
-                          timelines.find({ //ensure that timelines only appear if they have the specified popularity range and are on the right channel
-                            $and: [{
-                              channelId: docchannel._id
-                            }, {
-                              range: range
-                            }, {
-                              day: d
-                            }]
-                          }).sort({ //sort ascending from upcoming dates
-                            dateStarted: "1"
-                          }).exec(function(err, doctimelines) {
-                            if (doctimelines.length == 0) { //if there are no timelines yet
+      _id: data.seriesId
+    }, function(err, doc) {
+      if (!err) {
+        console.log('seriesId: ', data.seriesId)
+        console.log('doc: ', doc)
+        var score = doc.score; //get score for series
+        var newVideo = new videoFile({ //create new video file object
+          seriesId: data.seriesId,
+          fileName: data.fileName,
+          length: data.lengthOfFile,
+          episodeName: data.episodeName
+        });
+        var range = Math.ceil((score / 100)); //normalize score into rounded up integer from 1-12
+        newVideo.save(function(err) {
+          channels.findOne({ //find channel that series is on
+            _id: doc.channelId
+          }, function(err, docchannel) {
+            if (!err) {
+              (function setTimeSlots(d) {
+                console.log('running set timeslots');
+                var availableTimeslots = []; //array that will hold ids of available timeslots
+                if (range >= 1) {
+                  if (d == 14) { //check if two weeks in advance
+                    d = 0;
+                    range = range - 1;
+                  }
+                  console.log('got to d less than 14 and range more than 1');
+                  timelines.find({ //ensure that timelines only appear if they have the specified popularity range and are on the right channel
+                    $and: [{
+                      channelId: docchannel._id
+                    }, {
+                      range: range
+                    }, {
+                      day: d
+                    }]
+                  }).sort({ //sort ascending from upcoming dates
+                    dateStarted: "1"
+                  }).exec(function(err, doctimelines) {
+                    if (doctimelines.length == 0) { //if there are no timelines yet
 
-                              var ts = new timeslots({ //create a new timeslot for the file
-                                start: 0,
-                                end: data.lengthOfFile,
-                                fileId: newVideo._id
-                              });
-                              var date = new Date();
-                              date.setDate(date.getDate() + d);
-                              if ((date.getDay() == 0) || (date.getDay() == 6)) {
-                                date.setHours((rangeLookupTableWKD[range]) * 2);
-                              } else {
-                                date.setHours((rangeLookupTableWK[range]) * 2);
+                      var ts = new timeslots({ //create a new timeslot for the file
+                        start: 0,
+                        end: data.lengthOfFile,
+                        fileId: newVideo._id
+                      });
+                      var date = new Date();
+                      date.setDate(date.getDate() + d);
+                      if ((date.getDay() == 0) || (date.getDay() == 6)) {
+                        date.setHours((rangeLookupTableWKD[range]) * 2);
+                      } else {
+                        date.setHours((rangeLookupTableWK[range]) * 2);
+                      }
+                      date.setMinutes(0);
+                      date.setSeconds(0);
+                      var dayInt = d;
+                      if (dayInt > 6) {
+                        dayInt = dayInt % 7;
+                      }
+                      var newTimeline = new timelines({ //create a new timeline and insert the new timeslot
+                        day: dayInt,
+                        dateStart: date, //TODO need to set this to what makes sense
+                        timeslots: [ts],
+                        channelId: docchannel._id,
+                        range: range
+                      });
+                      newTimeline.save(function(err) {
+                        if (err) {
+                          console.log(err);
+                        }
+                        availableTimeslots.push(ts._id);
+                        res.send("{ \"Timeline id\": " + newTimeline._id + "}");
+
+                      }); //save the new timeslot
+                    } else { //if there are timelines available
+                      for (var i = 0; i < doctimelines.length; i++) { //loop through each timeline for this range
+
+                        var lastTime = (doctimelines[i].timeslots[doctimelines[i].timeslots.length - 1]).end; //find last time segment available in line
+                        console.log('last time: ' + lastTime);
+                        if ((120 - lastTime) > data.lengthOfFile) { //if the show can be inserted into the timeline
+                          var newTimeslot = new timeslots({ //create a new timeslot, insert the show, and append it to the timeslots array
+                            start: lastTime,
+                            end: (parseFloat(lastTime) + parseFloat(data.lengthOfFile)),
+                            fileId: newVideo._id
+                          });
+                          //update timeline object with new timeslot
+                          var updatedTimeslot = doctimelines[i].timeslots.push(newTimeslot);
+                          doctimelines[i].timeslots = updatedTimeslot;
+                          timelines.findByIdAndUpdate(
+                            doctimelines[i]._id, {
+                              $push: {
+                                "timeslots": newTimeslot
                               }
-                              date.setMinutes(0);
-                              date.setSeconds(0);
-                              var dayInt = d;
-                              if (dayInt > 6) {
-                                dayInt = dayInt % 7;
-                              }
-                              var newTimeline = new timelines({ //create a new timeline and insert the new timeslot
-                                day: dayInt,
-                                dateStart: date, //TODO need to set this to what makes sense
-                                timeslots: [ts],
-                                channelId: docchannel._id,
-                                range: range
-                              });
-                              newTimeline.save(function(err) {
-                                if (err) {
-                                  console.log(err);
-                                }
-                                availableTimeslots.push(ts._id);
-                                res.send("{ \"Timeline id\": " + newTimeline._id +"}");
-
-                              }); //save the new timeslot
-                            } else { //if there are timelines available
-                              for (var i = 0; i < doctimelines.length; i++) { //loop through each timeline for this range
-
-                                var lastTime = (doctimelines[i].timeslots[doctimelines[i].timeslots.length - 1]).end; //find last time segment available in line
-                                console.log('last time: ' + lastTime);
-                                if ((120 - lastTime) > data.lengthOfFile) { //if the show can be inserted into the timeline
-                                  var newTimeslot = new timeslots({ //create a new timeslot, insert the show, and append it to the timeslots array
-                                    start: lastTime,
-                                    end: (parseFloat(lastTime) + parseFloat(data.lengthOfFile)),
-                                    filename: data.fileName
-                                  });
-                                  //update timeline object with new timeslot
-                                  var updatedTimeslot = doctimelines[i].timeslots.push(newTimeslot);
-                                  doctimelines[i].timeslots = updatedTimeslot;
-                                  timelines.findByIdAndUpdate(
-                                    doctimelines[i]._id, {
-                                      $push: {
-                                        "timeslots": newTimeslot
-                                      }
-                                    }, {
-                                      safe: true,
-                                      upsert: true
-                                    },
-                                    function(err, model) {
-                                      if (!err)
-                                        res.send("{ \"Timeline\": " + model._id + "}");
-                                      else
-                                        console.log(err);
+                            }, {
+                              safe: true,
+                              upsert: true
+                            },
+                            function(err, model) {
+                              if (!err)
+                                res.send("{ \"Timeline\": " + model._id + "}");
+                              else
+                                console.log(err);
+                            }
+                          );
+                          availableTimeslots.push(newTimeslot._id); //push available timeslot to arr
+                        } else {
+                          console.log('last time: ', lastTime);
+                          console.log('length of file: ', data.lengthOfFile);
+                          if (((120 - lastTime) > (data.lengthOfFile / 3) && data.lengthOfFile > 10) || (data.lengthOfFile < 10)) {
+                            var date = new Date();
+                            if ((date.getDay() == 0) || (date.getDay() == 6)) {
+                              var nextRangeTimeline = rangeLookupTableWKD.indexOf(rangeLookupTableWKD[range] + 1);
+                            } else {
+                              var nextRangeTimeline = rangeLookupTableWK.indexOf(rangeLookupTableWK[range] + 1);
+                            }
+                            timelines.find({ //ensure that timelines only appear if they have the specified popularity range and are on the right channel
+                              $and: [{
+                                channelId: docchannel._id
+                              }, {
+                                range: nextRangeTimeline
+                              }, {
+                                day: d
+                              }]
+                            }).sort({ //sort ascending from upcoming dates
+                              dateStarted: "1"
+                            }).exec(function(err, doctimelines2) {
+                              if (doctimelines2.length == 0) {
+                                var newTimeslotCurrent = new timeslots({ //create a new timeslot, insert the show, and append it to the timeslots array
+                                  start: lastTime,
+                                  end: 120,
+                                  fileId: newVideo._id
+                                });
+                                console.log("index: "+i)
+                                timelines.findByIdAndUpdate(
+                                  doctimelines[0]._id, {
+                                    $push: {
+                                      "timeslots": newTimeslotCurrent
                                     }
-                                  );
-                                  availableTimeslots.push(newTimeslot._id); //push available timeslot to arr
-                                }
-                              }
-                              if (availableTimeslots.length == 0) {
+                                  }, {
+                                    safe: true,
+                                    upsert: true
+                                  },
+                                  function(err, model) {
+                                    if (!err) {
+                                      var ts = new timeslots({ //create a new timeslot for the file
+                                        start: 0,
+                                        end: data.lengthOfFile - (120 - lastTime),
+                                        fileId: newVideo._id
+                                      });
+                                      var newDate = new Date();
+                                      newDate.setDate(newDate.getDate() + d);
+                                      if ((newDate.getDay() == 0) || (newDate.getDay() == 6)) {
+                                        newDate.setHours((rangeLookupTableWKD[nextRangeTimeline]) * 2);
+                                      } else {
+                                        newDate.setHours((rangeLookupTableWK[nextRangeTimeline]) * 2);
+                                      }
+                                      newDate.setMinutes(0);
+                                      newDate.setSeconds(0);
+                                      var dayInt = d;
+                                      if (dayInt > 6) {
+                                        dayInt = dayInt % 7;
+                                      }
+                                      console.log('Date' + newDate);
+                                      var newTimeline = new timelines({ //create a new timeline and insert the new timeslot
+                                        day: dayInt,
+                                        dateStart: newDate, //TODO need to set this to what makes sense
+                                        timeslots: [ts],
+                                        channelId: docchannel._id,
+                                        range: nextRangeTimeline
+                                      });
+                                      newTimeline.save(function(err) {
+                                        if (err) {
+                                          console.log(err);
+                                        }
+                                        availableTimeslots.push(ts._id);
+                                        res.send("{ \"Timeline id\": " + newTimeline._id + "}");
+
+                                      }); //save the new timeslot
+                                    } else console.log(err);
+                                  }
+                                );
+                              } else {
                                 setTimeSlots(d + 1);
                               }
-                            }
-                          });
-                      } else {
-                        res.send("No available timeslots");
+                            });
+                          } else {
+                            setTimeSlots(d + 1) 
+                          }
+                        }
                       }
-                    })(0);
+
+                    }
+                  });
                 } else {
-                  sendERR(err, res);
+                  res.send("No available timeslots");
                 }
-              });
+              })(0);
+            } else {
+              sendERR(err, res);
+            }
           });
+        });
       } else {
         sendERR(err, res);
       }
     });
-} catch (err) {
-  console.log('video post problem');
-  sendERR(err, res);
-}
+  } catch (err) {
+    console.log('video post problem');
+    sendERR(err, res);
+  }
 }
