@@ -10,10 +10,10 @@ function sendERR(err, res) {
 }
 
 exports.timelinesGET = function(req, res, next) {
-  var currentTime = Date.now;
+  var currentTime = Date.now();
   var query, home; // query for aggregation, home is to tell if it was requested for viewing
   var id = req.params.id;
-  var next = req.query.next; //value is true not undefined
+  var next = req.query.next || false; //value is true not undefined
   var nextTimeLine = req.query.ntl || 0; //index for next timeline (not built yet)
   var nextTimeSlot = req.query.nts || 0; //index for next timeslot (built)
   var range = req.query.range || "all"; // if not queried default to all
@@ -50,41 +50,59 @@ exports.timelinesGET = function(req, res, next) {
     };
   }
 
+  console.log("Retrieving docs");
   timelines.find(query).sort({ //sort ascending from upcoming dates
     dateStarted: "1"
   }).exec(function(err, doctimelines) {
-    if (err) res.sendERR(err, res);
-    if (home) {
-      if (doctimelines.length == 1)  { //should only get one timeline if calculations done right
-        if (next) { // requesting next timeslot once done the current one
-          var timeslot = doctimelines[0].timeslots[nextTimeSlot]
-          //sending ts_index to maintain the index of the timeslots and add 1 on the frontend, subsequently requesting the next timeslot
-          res.send("{ \"message\": \"Success\", \"tl_index\": "+0+", \"ts_index\": "+nextTimeSlot+", \"fileId\": \""+timeslot.fileId+"\", \"start\": "+timeslot.start+" }")
-        } else {
-          var timeslots = doctimelines[0].timeslots;
-          for (var i=0; i<timeslots.length; i++) { //loop through timeslots (hopefully I can make the aggregation query better so this isn't needed)
-            
-            var startTime = doctimelines[0].dateStart;
-
-            //check if current time is between the requested timeslots
-            if (currentTime > startTime.setMinutes(startTime.getMinutes()+timeslots[i].start) && currentTime < startTime.setMinutes(startTime.getMinutes()+timeslots[i].end)) {
-              // get when the video should be requested
-              var videoStart =  (currentTime.getTime() - startTime.setMinutes(startTime.getMinutes()+timeslots[i].start).getTime())/6000; //video start in minutes
-
-              //send file name back with start time (render video element with start time)
-              //built to get next timeslot but not next timeline
-              res.send("{ \"message\": \"Success\", \"tl_index\": "+0+", \"ts_index\": "+i+", \"fileId\": \""+timeslots[i].fileId+"\", \"start\": "+videoStart+" }")
-            } else {
-              res.send("{ \"message\": \"Error: can't find matching timeslot\" }")
-            }
-          }  
-        }
-        
-      }
+    console.log("Retrieved docs");
+    if (err) {
+      sendERR(err, res);
+      console.log(err);
     } else {
-      // if not requesting from home page (or simply the normal request), just send back some timelines
-      res.send(doctimelines)
+      console.log("Success in retrieval");
+
+      if (home) {
+        if (doctimelines.length == 1)  { //should only get one timeline if calculations done right
+          console.log("Found timeline")
+          if (next) { // requesting next timeslot once done the current one
+            var timeslot = doctimelines[0].timeslots[nextTimeSlot]
+            //sending ts_index to maintain the index of the timeslots and add 1 on the frontend, subsequently requesting the next timeslot
+            console.log("Next completed");
+            res.send("{ \"message\": \"Success\", \"tl_index\": "+0+", \"ts_index\": "+nextTimeSlot+", \"fileId\": \""+timeslot.fileId+"\", \"start\": "+timeslot.start+" }")
+          } else {
+            var timeslots = doctimelines[0].timeslots;
+            for (var i=0; i<timeslots.length; i++) { //loop through timeslots (hopefully I can make the aggregation query better so this isn't needed)
+              
+              var startTime = doctimelines[0].dateStart;
+
+              //check if current time is between the requested timeslots
+              if (currentTime > startTime.setMinutes(startTime.getMinutes()+timeslots[i].start) && currentTime < startTime.setMinutes(startTime.getMinutes()+timeslots[i].end)) {
+                // get when the video should be requested
+                var videoStart =  (currentTime.getTime() - startTime.setMinutes(startTime.getMinutes()+timeslots[i].start).getTime())/6000; //video start in minutes
+
+                //send file name back with start time (render video element with start time)
+                //built to get next timeslot but not next timeline
+                console.log("Success!")
+                res.send("{ \"message\": \"Success\", \"tl_index\": "+0+", \"ts_index\": "+i+", \"fileId\": \""+timeslots[i].fileId+"\", \"start\": "+videoStart+" }")
+              } else {
+                console.log("Error: can't find matching timeslot")
+                res.send("{ \"message\": \"Error: can't find matching timeslot\" }")
+              }
+            }  
+          }
+          
+        } else {
+          console.log("Error: can't find matching timeline")
+          res.send("{ \"message\": \"Error: can't find matching timeline\" }")
+        }
+      } else {
+
+        // if not requesting from home page (or simply the normal request), just send back some timelines
+        console.log("Timeline")
+        res.send(doctimelines)
+      }   
     }
+   
    
   });
 }
@@ -165,6 +183,7 @@ exports.videoPOST = function(req, res, next) {
                         fileId: newVideo._id
                       });
                       var date = new Date();
+
                       date.setDate(date.getDate() + d);
                       if ((date.getDay() == 0) || (date.getDay() == 6)) {
                         date.setHours((rangeLookupTableWKD[range]) * 2);
@@ -177,9 +196,12 @@ exports.videoPOST = function(req, res, next) {
                       if (dayInt > 6) {
                         dayInt = dayInt % 7;
                       }
+                      var dateEnd = date;
+                      dateEnd.setHours(date.getHours()+2);
                       var newTimeline = new timelines({ //create a new timeline and insert the new timeslot
                         day: dayInt,
                         dateStart: date, //TODO need to set this to what makes sense
+                        dateEnd: dateEnd,
                         timeslots: [ts],
                         channelId: docchannel._id,
                         range: range
@@ -189,6 +211,7 @@ exports.videoPOST = function(req, res, next) {
                           console.log(err);
                         }
                         availableTimeslots.push(ts._id);
+                        console.log("Timeline saved!")
                         res.send("{ \"Timeline id\": " + newTimeline._id + "}");
 
                       }); //save the new timeslot
