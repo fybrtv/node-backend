@@ -39,6 +39,7 @@ var timeline = new Schema({//2 hour timelines
 	id: ObjectId,
 	dateCreated: {type: Date, default: Date.now},
 	dateStart: {type: Date},
+	dateEnd: {type: Date},
 	channelId: {type: String},
 	range: {type: Number},
 	timeslots: [timeslot],

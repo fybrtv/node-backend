@@ -8,7 +8,7 @@ exports.channelsPOST = function(req, res, next) {
 	var data = req.body;
   	try {
   		var newchannels = new channels({
-			channelName: data.channelName,
+			channelName: data.channelName
 		});  
 		newchannels.save(function(err){
 			console.log('save function');

@@ -10,22 +10,82 @@ function sendERR(err, res) {
 }
 
 exports.timelinesGET = function(req, res, next) {
+  var currentTime = Date.now;
+  var query, home; // query for aggregation, home is to tell if it was requested for viewing
   var id = req.params.id;
-  var range = req.query.range || "all";
-  var day = req.query.day || "all";
+  var next = req.query.next; //value is true not undefined
+  var nextTimeLine = req.query.ntl || 0; //index for next timeline (not built yet)
+  var nextTimeSlot = req.query.nts || 0; //index for next timeslot (built)
+  var range = req.query.range || "all"; // if not queried default to all
+  var day = req.query.day || "all"; // if not queried default to all
 
-  timelines.find({ //ensure that timelines only appear if they have the specified popularity range and are on the right channel
-    $and: [{
+  if (range == "all" || day == "all") {
+    home = true;
+    // get the timeline between 
+    query = { 
+      $and: [{
+        channelId: id
+      },{ 
+        dateStart: { $lt: currentTime } 
+      }, {
+        dateEnd: { $gt: currentTime } // Added to schema.js and node-backend
+      }]
+    };
+  } else if (next == true) {
+    home = true;
+    // for get next timeline we get all channels and work from there
+    query = {
       channelId: id
-    }, {
-      range: range
-    }, {
-      day: day
-    }]
-  }).sort({ //sort ascending from upcoming dates
+    };
+  } else {
+    home = false;
+    query = { //ensure that timelines only appear if they have the specified popularity range and are on the right channel
+      $and: [{
+        channelId: id
+      }, {
+        range: range
+      }, {
+        day: day
+      }]
+    };
+  }
+
+  timelines.find(query).sort({ //sort ascending from upcoming dates
     dateStarted: "1"
   }).exec(function(err, doctimelines) {
-    res.send(doctimelines)
+    if (err) res.sendERR(err, res);
+    if (home) {
+      if (doctimelines.length == 1)  { //should only get one timeline if calculations done right
+        if (next) { // requesting next timeslot once done the current one
+          var timeslot = doctimelines[0].timeslots[nextTimeSlot]
+          //sending ts_index to maintain the index of the timeslots and add 1 on the frontend, subsequently requesting the next timeslot
+          res.send("{ \"message\": \"Success\", \"tl_index\": "+0+", \"ts_index\": "+nextTimeSlot+", \"fileId\": \""+timeslot.fileId+"\", \"start\": "+timeslot.start+" }")
+        } else {
+          var timeslots = doctimelines[0].timeslots;
+          for (var i=0; i<timeslots.length; i++) { //loop through timeslots (hopefully I can make the aggregation query better so this isn't needed)
+            
+            var startTime = doctimelines[0].dateStart;
+
+            //check if current time is between the requested timeslots
+            if (currentTime > startTime.setMinutes(startTime.getMinutes()+timeslots[i].start) && currentTime < startTime.setMinutes(startTime.getMinutes()+timeslots[i].end)) {
+              // get when the video should be requested
+              var videoStart =  (currentTime.getTime() - startTime.setMinutes(startTime.getMinutes()+timeslots[i].start).getTime())/6000; //video start in minutes
+
+              //send file name back with start time (render video element with start time)
+              //built to get next timeslot but not next timeline
+              res.send("{ \"message\": \"Success\", \"tl_index\": "+0+", \"ts_index\": "+i+", \"fileId\": \""+timeslots[i].fileId+"\", \"start\": "+videoStart+" }")
+            } else {
+              res.send("{ \"message\": \"Error: can't find matching timeslot\" }")
+            }
+          }  
+        }
+        
+      }
+    } else {
+      // if not requesting from home page (or simply the normal request), just send back some timelines
+      res.send(doctimelines)
+    }
+   
   });
 }
 
@@ -224,6 +284,7 @@ exports.videoPOST = function(req, res, next) {
                                       var newTimeline = new timelines({ //create a new timeline and insert the new timeslot
                                         day: dayInt,
                                         dateStart: newDate, //TODO need to set this to what makes sense
+                                        dateEnd: newDate.setHours(newDate.getHours()+2),
                                         timeslots: [ts],
                                         channelId: docchannel._id,
                                         range: nextRangeTimeline
