@@ -144,6 +144,7 @@ exports.videoPOST = function(req, res, next) {
         console.log('doc: ', doc)
         var score = doc.score; //get score for series
         var newVideo = new videoFile({ //create new video file object
+          fileId: data.fileId,
           seriesId: data.seriesId,
           fileName: data.fileName,
           length: data.lengthOfFile,
@@ -180,7 +181,7 @@ exports.videoPOST = function(req, res, next) {
                       var ts = new timeslots({ //create a new timeslot for the file
                         start: 0,
                         end: data.lengthOfFile,
-                        fileId: newVideo._id
+                        fileId: newVideo.fileId
                       });
                       var date = new Date();
 
@@ -224,7 +225,7 @@ exports.videoPOST = function(req, res, next) {
                           var newTimeslot = new timeslots({ //create a new timeslot, insert the show, and append it to the timeslots array
                             start: lastTime,
                             end: (parseFloat(lastTime) + parseFloat(data.lengthOfFile)),
-                            fileId: newVideo._id
+                            fileId: newVideo.fileId
                           });
                           //update timeline object with new timeslot
                           var updatedTimeslot = doctimelines[i].timeslots.push(newTimeslot);
@@ -271,7 +272,7 @@ exports.videoPOST = function(req, res, next) {
                                 var newTimeslotCurrent = new timeslots({ //create a new timeslot, insert the show, and append it to the timeslots array
                                   start: lastTime,
                                   end: 120,
-                                  fileId: newVideo._id
+                                  fileId: newVideo.fileId
                                 });
                                 console.log("index: "+i)
                                 timelines.findByIdAndUpdate(
@@ -288,7 +289,7 @@ exports.videoPOST = function(req, res, next) {
                                       var ts = new timeslots({ //create a new timeslot for the file
                                         start: 0,
                                         end: data.lengthOfFile - (120 - lastTime),
-                                        fileId: newVideo._id
+                                        fileId: newVideo.fileId
                                       });
                                       var newDate = new Date();
                                       newDate.setDate(newDate.getDate() + d);

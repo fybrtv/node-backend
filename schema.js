@@ -9,6 +9,7 @@ conn.on('error', console.error.bind(console, 'connection error:'));
 
 var videoFile = new Schema({
 	id: ObjectId,
+	fileId: {type: String},
 	dateCreated: {type: Date, default: Date.now},
 	seriesId: {type: String},
 	length: {type: Number},
