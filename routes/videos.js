@@ -10,7 +10,7 @@ function sendERR(err, res) {
 }
 
 exports.timelinesGET = function(req, res, next) {
-  var currentTime = Date.now();
+  var currentTime = new Date(Date.now());
   var query, home; // query for aggregation, home is to tell if it was requested for viewing
   var id = req.params.id;
   var next = req.query.next || false; //value is true not undefined
@@ -71,24 +71,38 @@ exports.timelinesGET = function(req, res, next) {
             res.send("{ \"message\": \"Success\", \"tl_index\": "+0+", \"ts_index\": "+nextTimeSlot+", \"fileId\": \""+timeslot.fileId+"\", \"start\": "+timeslot.start+" }")
           } else {
             var timeslots = doctimelines[0].timeslots;
+            var foundSlots = false;
             for (var i=0; i<timeslots.length; i++) { //loop through timeslots (hopefully I can make the aggregation query better so this isn't needed)
               
-              var startTime = doctimelines[0].dateStart;
-
+              var startTime = new Date(doctimelines[0].dateStart.getTime());
+              console.log("Start time: "+startTime);
               //check if current time is between the requested timeslots
-              if (currentTime > startTime.setMinutes(startTime.getMinutes()+timeslots[i].start) && currentTime < startTime.setMinutes(startTime.getMinutes()+timeslots[i].end)) {
+              var timeslotStart = new Date(startTime.setSeconds(timeslots[i].start * 60));
+              startTime = new Date(doctimelines[0].dateStart.getTime());
+              var timeslotEnd = new Date(startTime.setSeconds(timeslots[i].end * 60));
+              console.log(timeslotStart);
+              console.log('time start',timeslots[i].start)
+              console.log('time end',timeslots[i].end)
+              console.log(timeslotEnd);
+              if ((currentTime.getTime() > timeslotStart.getTime()) && (currentTime.getTime() < timeslotEnd.getTime())) {
                 // get when the video should be requested
-                var videoStart =  (currentTime.getTime() - startTime.setMinutes(startTime.getMinutes()+timeslots[i].start).getTime())/6000; //video start in minutes
+                var videoStart =  (currentTime.getTime() - timeslotStart.getTime())/60000; //video start in minutes
 
                 //send file name back with start time (render video element with start time)
                 //built to get next timeslot but not next timeline
                 console.log("Success!")
-                res.send("{ \"message\": \"Success\", \"tl_index\": "+0+", \"ts_index\": "+i+", \"fileId\": \""+timeslots[i].fileId+"\", \"start\": "+videoStart+" }")
+                foundSlots = true;
+                return res.send("{ \"message\": \"Success\", \"tl_index\": "+0+", \"ts_index\": "+i+", \"fileId\": \""+timeslots[i].fileId+"\", \"start\": "+videoStart+" }")
+                
               } else {
                 console.log("Error: can't find matching timeslot")
-                res.send("{ \"message\": \"Error: can't find matching timeslot\" }")
+                
               }
-            }  
+
+            } 
+            if(!foundSlots){
+              res.send("{ \"message\": \"Error: can't find matching timeslot\" }") 
+            }
           }
           
         } else {
@@ -197,8 +211,9 @@ exports.videoPOST = function(req, res, next) {
                       if (dayInt > 6) {
                         dayInt = dayInt % 7;
                       }
-                      var dateEnd = date;
-                      dateEnd.setHours(date.getHours()+2);
+                      console.log('creating new timeline ending at: ', date);
+                      var dateEnd = new Date(date.getTime());
+                      dateEnd.setHours(dateEnd.getHours()+2);
                       var newTimeline = new timelines({ //create a new timeline and insert the new timeslot
                         day: dayInt,
                         dateStart: date, //TODO need to set this to what makes sense
@@ -218,7 +233,7 @@ exports.videoPOST = function(req, res, next) {
                       }); //save the new timeslot
                     } else { //if there are timelines available
                       for (var i = 0; i < doctimelines.length; i++) { //loop through each timeline for this range
-
+                        console.log('adding to old timeline ending at: ');
                         var lastTime = (doctimelines[i].timeslots[doctimelines[i].timeslots.length - 1]).end; //find last time segment available in line
                         console.log('last time: ' + lastTime);
                         if ((120 - lastTime) > data.lengthOfFile) { //if the show can be inserted into the timeline
