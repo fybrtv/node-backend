@@ -81,4 +81,49 @@ var server = app.listen(5000, function () {
   var host = server.address().address;
   var port = server.address().port;
   console.log('Fybr server at http://%s:%s', host, port);
+  //addToTimeline(15,'553c4752594c6adaa7ad79e2');
 });
+var addToTimeline = function(minutesToAdd,cid){
+  var videoFile = mongoose.model('videoFile');
+  var series = mongoose.model('series');
+  var channels = mongoose.model('channel');
+  var timelines = mongoose.model('timeline');
+  var timeslots = mongoose.model('timeslot');
+  var currentTime = new Date(Date.now());
+query = {
+    $and: [{
+        channelId: cid
+    }, {
+        dateStart: {
+            $lt: currentTime
+        }
+    }, {
+        dateEnd: {
+            $gt: currentTime
+        } // Added to schema.js and node-backend
+    }]
+};
+timelines.find(query).sort({ //sort ascending from upcoming dates
+        dateStarted: "1"
+    }).exec(function(err, doctimelines) {
+        var lastTime = (doctimelines[0].timeslots[doctimelines[0].timeslots.length - 1]).end;
+            var newTimeslotCurrent = new timeslots({ //create a new timeslot, insert the show, and append it to the timeslots array
+                start: lastTime,
+                end: minutesToAdd+lastTime,
+                fileId: ''
+            });
+            timelines.findByIdAndUpdate(
+                doctimelines[0]._id, {
+                    $push: {
+                        "timeslots": newTimeslotCurrent
+                    }
+                }, {
+                    safe: true,
+                    upsert: true
+                },
+                function(err, model) {
+                  if(!err) console.log('pushed timeslot');
+                }
+            )
+        })
+}

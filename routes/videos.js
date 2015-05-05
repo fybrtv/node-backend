@@ -86,7 +86,7 @@ exports.timelinesGET = function(req, res, next) {
               console.log(timeslotEnd);
               if ((currentTime.getTime() > timeslotStart.getTime()) && (currentTime.getTime() < timeslotEnd.getTime())) {
                 // get when the video should be requested
-                var videoStart =  (currentTime.getTime() - timeslotStart.getTime())/60000; //video start in minutes
+                var videoStart =  (currentTime.getTime() - timeslotStart.getTime())/1000; //video start in seconds
 
                 //send file name back with start time (render video element with start time)
                 //built to get next timeslot but not next timeline
