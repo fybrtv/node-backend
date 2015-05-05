@@ -319,11 +319,12 @@ exports.videoPOST = function(req, res, next) {
                                       if (dayInt > 6) {
                                         dayInt = dayInt % 7;
                                       }
-                                      console.log('Date' + newDate);
+                                      var dateEnd = new Date(newDate.getTime());
+                                      dateEnd.setHours(dateEnd.getHours()+2);
                                       var newTimeline = new timelines({ //create a new timeline and insert the new timeslot
                                         day: dayInt,
                                         dateStart: newDate, //TODO need to set this to what makes sense
-                                        dateEnd: newDate.setHours(newDate.getHours()+2),
+                                        dateEnd: dateEnd,
                                         timeslots: [ts],
                                         channelId: docchannel._id,
                                         range: nextRangeTimeline
