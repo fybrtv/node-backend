@@ -58,9 +58,18 @@ var userSchema = new Schema({
 	avatar: {type: String},
 	typeOfAccount: {type: Number, default: 0} //type of account will be an int, 1 for creator, 0 for streamer
 })
+var questionSchema = new Schema({
+	id: ObjectId,
+	dateCreated: {type: Date, default: Date.now},
+	askerId: {type: String},
+	answer: {type: String},
+	seriesId: {type: String},
+	question: {type: String}
+})
 module.exports = db.model('videoFile', videoFile, 'videoFile'); 
 module.exports = db.model('series', series, 'series'); 
 module.exports = db.model('channel', channel, 'channel'); 
 module.exports = db.model('timeslot', timeslot, 'timeslot'); 
 module.exports = db.model('timeline', timeline, 'timeline');
 module.exports = db.model('users', userSchema,'users');
+module.exports = db.model('questions', questionSchema,'questions');

@@ -7,12 +7,12 @@ var bodyParser = require('body-parser');
 var session = require('express-session');
 var mongoose = require("mongoose");
 var schema = require("./schema");
-
 var routes = require('./routes/index');
 var videos = require('./routes/videos');
 var series = require('./routes/series');
 var channels = require('./routes/channels');
 var users = require('./routes/users');
+var amas = require('./routes/amas');
 var app = express();
 
 // view engine setup
@@ -38,6 +38,14 @@ app.get('/series/userId/:id',series.seriesUserIdGET)
 app.post('/channels', channels.channelsPOST);
 app.get('/channels', channels.channelsGET);
 app.get('/channels/:id',channels.channelsGET);
+
+app.post('/questions', amas.questionsPOST);
+app.post('/questionsUpdate', amas.questionsUPDATE);
+app.delete('/questions/:id', amas.questionsDELETE);
+app.get('/questionsGETS/:id', amas.questionsGETSID);
+app.get('/questionsGETU/:id', amas.questionsGETUID);
+app.get('/questions/:id',amas.questionsGET);
+
 app.post('/users',users.usersPOST);
 app.get('/users/:id',users.usersIdGET);
 app.delete('/users/:id',users.usersIdDELETE);
@@ -82,7 +90,7 @@ var server = app.listen(5000, function () {
   var port = server.address().port;
   console.log('Fybr server at http://%s:%s', host, port);
   //addToTimeline(83,'553c4755594c6adaa7ad79e3');
-});
+})
 var addToTimeline = function(minutesToAdd,cid){
   var videoFile = mongoose.model('videoFile');
   var series = mongoose.model('series');

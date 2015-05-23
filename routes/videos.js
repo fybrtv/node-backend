@@ -4,7 +4,6 @@ var series = mongoose.model('series');
 var channels = mongoose.model('channel');
 var timelines = mongoose.model('timeline');
 var timeslots = mongoose.model('timeslot');
-
 function sendERR(err, res) {
   res.send("{ \"message\": \"" + err + "\" }");
 }
@@ -63,12 +62,20 @@ exports.timelinesGET = function(req, res, next) {
 
       if (home) {
         if (doctimelines.length == 1)  { //should only get one timeline if calculations done right
-          console.log("Found timeline")
+          console.log("Found timeline");
           if (next) { // requesting next timeslot once done the current one
             var timeslot = doctimelines[0].timeslots[nextTimeSlot]
+            var seriesId;
+            var creatorId;
+            videoFile.findById(timeslot.fileId,function(err,data){
+                  seriesId = data.seriesId;
+            })
+            series.findById(seriesId, function(err, data){
+                  creatorId = data.userId;
+            })
             //sending ts_index to maintain the index of the timeslots and add 1 on the frontend, subsequently requesting the next timeslot
             console.log("Next completed");
-            res.send("{ \"message\": \"Success\", \"tl_index\": "+0+", \"ts_index\": "+nextTimeSlot+", \"fileId\": \""+timeslot.fileId+"\", \"start\": "+timeslot.start+" }")
+            res.send("{ \"message\": \"Success\", \"tl_index\": "+0+", \"ts_index\": "+nextTimeSlot+", \"seriesId\": "+seriesId+", \"creatorId\": "+creatorId+", \"fileId\": \""+timeslot.fileId+"\", \"start\": "+timeslot.start+" }")
           } else {
             var timeslots = doctimelines[0].timeslots;
             var foundSlots = false;
@@ -92,7 +99,15 @@ exports.timelinesGET = function(req, res, next) {
                 //built to get next timeslot but not next timeline
                 console.log("Success!")
                 foundSlots = true;
-                return res.send("{ \"message\": \"Success\", \"tl_index\": "+0+", \"ts_index\": "+i+", \"fileId\": \""+timeslots[i].fileId+"\", \"start\": "+videoStart+" }")
+                var seriesId;
+                var creatorId;
+                videoFile.findById(timeslot.fileId,function(err,data){
+                  seriesId = data.seriesId;
+                })
+                series.findById(seriesId, function(err, data){
+                  creatorId = data.userId;
+                })
+                return res.send("{ \"message\": \"Success\", \"tl_index\": "+0+", \"ts_index\": "+i+", \"seriesId\": "+seriesId+", \"creatorId\": "+creatorId+", \"fileId\": \""+timeslots[i].fileId+"\", \"start\": "+videoStart+" }")
                 
               } else {
                 console.log("Error: can't find matching timeslot")
