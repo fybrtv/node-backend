@@ -28,7 +28,7 @@ exports.questionsPOST = function(req, res) {
 };
 exports.questionsUPDATE = function(req, res) {
 	var data = req.body;
-    timelines.findByIdAndUpdate(
+    questions.findByIdAndUpdate(
         data.questionId, {
             $push: {
                 "answer": data.answer
