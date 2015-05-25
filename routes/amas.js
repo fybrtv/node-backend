@@ -28,8 +28,10 @@ exports.questionsPOST = function(req, res) {
 };
 exports.questionsUPDATE = function(req, res) {
 	var data = req.body;
+	console.log(data);
+	console.log(data.answer);
     questions.findByIdAndUpdate(
-        data.questionId, {
+        req.params.id, {
             $push: {
                 "answer": data.answer
             }

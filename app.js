@@ -40,7 +40,7 @@ app.get('/channels', channels.channelsGET);
 app.get('/channels/:id',channels.channelsGET);
 
 app.post('/questions', amas.questionsPOST);
-app.post('/questionsUpdate', amas.questionsUPDATE);
+app.post('/questionsUpdate/:id', amas.questionsUPDATE);
 app.delete('/questions/:id', amas.questionsDELETE);
 app.get('/questionsGETS/:id', amas.questionsGETSID);
 app.get('/questionsGETU/:id', amas.questionsGETUID);
